@@ -10,4 +10,5 @@ def create_flask_app():
     app.config["SECRET_KEY"] = "secret123!@#"
     app.config["JWT_SECRET_KEY"] = "jwt-secret-string-!@#"
     app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies", "json", "query_string"]
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = False
     return app

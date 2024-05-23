@@ -8,10 +8,11 @@ from flask_jwt_extended import (
     create_access_token,
     set_access_cookies,
     unset_jwt_cookies,
+    get_jwt,
 )
 
-from models import User
-from forms import RegisterForm
+from models import User, TaskEstimation
+from forms import RegisterForm, AddTaskForm, EditTaskForm
 from config import create_flask_app
 from flask_pymongo import PyMongo, ObjectId
 
@@ -94,6 +95,80 @@ def dashboard():
         {"_id": ObjectId("664ed9f5df4b803e7381907d")}
     )
     return render_template("dashboard.html", account=User(**account))
+
+
+@app.route("/add_task", methods=["GET", "POST"])
+@jwt_required()
+def add_task():
+    jwt_payload = get_jwt()
+    # print(f"{current_user=}")
+    # print(f"{jwt_payload=}")
+
+    form: AddTaskForm = AddTaskForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form_data = form.data
+            result = mongo.db.task_estimate.insert_one(
+                {
+                    "name": form_data["name"],
+                    "description": form_data["description"],
+                    "complexity": int(form_data["complexity"]),
+                    "size": int(form_data["size"]),
+                    "task_type": form_data["task_type"],
+                    "user_id": jwt_payload["id"],
+                }
+            )
+            task_id = result.inserted_id
+            print(f"Task added : {str(task_id)}")
+            flash("Task Added")
+            return render_template("add_task_estimate.html", form=form, request_type="add")
+        else:
+            print(form.errors)
+    return render_template("add_task_estimate.html", form=form, request_type="add")
+
+
+@app.route("/edit_task/<string:task_id>", methods=["GET", "POST"])
+@jwt_required()
+def edit_task(task_id):
+    # jwt_payload = get_jwt()
+    # print(f"{current_user=}")
+    # print(f"{jwt_payload=}")
+    task_result = mongo.db.task_estimate.find_one({"_id": ObjectId(task_id)})
+    if task_result is None:
+        raise NotFound("Task not found.")
+    task = TaskEstimation(**task_result).get_data(ignore_fields=["id", "user_id"])
+    form: AddTaskForm = EditTaskForm(**task)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form_data = form.data
+            result = mongo.db.task_estimate.update_one(
+                filter={"_id": task_id},
+                update={
+                    "name": form_data["name"],
+                    "description": form_data["description"],
+                    "complexity": int(form_data["complexity"]),
+                    "size": int(form_data["size"]),
+                    "task_type": form_data["task_type"],
+                    # "user_id": jwt_payload["id"],
+                },
+            )
+            task_id = result.inserted_id
+            print(f"Task updated : {str(task_id)}")
+            flash("Task updated")
+            return render_template("add_task_estimate.html", form=form, request_type="edit")
+        else:
+            print(form.errors)
+    return render_template("add_task_estimate.html", form=form, request_type="edit")
+
+
+@app.route("/list_tasks", methods=["GET"])
+def list_tasks():
+    list_tasks_result = mongo.db.task_estimate.find()
+    list_tasks = [
+        TaskEstimation(**task).get_data(ignore_fields=[]) for task in list_tasks_result
+    ]
+    print(list_tasks)
+    return render_template("list_task_estimate.html", tasks=list_tasks)
 
 
 @app.route("/logout", methods=["GET"])

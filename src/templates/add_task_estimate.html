@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+{% if request_type == 'add' %}
+<h2>Add Task Estimate </h2>
+{% else %}
+<h2>Edit Task Estimate </h2>
+{% endif %}
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.name.label(class_="form-label-sm") }}<br>
+        {{ form.name(class_="form-control-sm",size=20) }}
+    </p>
+    <p>
+        {{ form.description.label(class_="form-label-sm") }}<br>
+        {{ form.description(class_="form-control-sm") }}
+    </p>
+    <p>
+        {{ form.complexity.label(class_="form-label-sm") }}<br>
+        {{ form.complexity(class_="form-control-sm") }}
+    </p>
+    <p>
+        {{ form.size.label(class_="form-label-sm") }}<br>
+        {{ form.size(class_="form-control-sm") }}
+    </p>
+    <p>
+        {{ form.task_type.label(class_="form-label-sm") }}<br>
+        {{ form.task_type(class_="form-control-sm") }}
+    </p>
+    {% if request_type == "add" %}
+    <p><input class="btn btn-primary" type="submit" value="Add Task Estimate"></p>
+    {% else %}
+    <p><input class="btn btn-primary" type="submit" value="Edit Task Estimate"></p>
+    {% endif %}
+
+</form>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class=flashes>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

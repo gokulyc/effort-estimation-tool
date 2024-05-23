@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>List of Task Estimates </h2>
+{% for task in tasks%}
+<div class="card" style="width: 18rem;">
+    <img src="..." class="card-img-top" alt="...">
+    <h5 class="card-img-top">{{ task.name}}</h5>
+    <div class="card-body">
+      <h5 class="card-title"></h5>
+      <p class="card-text">{{task.description}}</p>
+      <p>Complexity: {{task.complexity}}</p>
+      <p>Size: {{task.size}}</p>
+      <p>Task Type: {{task.task_type}}</p>
+      <a href="/edit_task/{{task.id}}" class="btn btn-primary">Edit Task</a>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}
