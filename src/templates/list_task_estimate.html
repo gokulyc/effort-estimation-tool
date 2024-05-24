@@ -7,11 +7,12 @@
     <!-- <img src="..." class="card-img-top" alt="..."> -->
     <h5 class="card-img-top">{{ task.name}}</h5>
     <div class="card-body">
-      <h5 class="card-title"></h5>
+      <h5 class="card-title">Task Type: {{task.task_type}}</h5>
       <p class="card-text">{{task.description}}</p>
       <p>Complexity: {{task.complexity}}</p>
       <p>Size: {{task.size}}</p>
-      <p>Task Type: {{task.task_type}}</p>
+      <p>Status: {{task.task_status}}</p>
+      <p>Task Estimate: {{task.task_estimate}} (Hrs/ 120 Hrs)</p>
       <a href="/edit_task/{{task.id}}" class="btn btn-primary">Edit Task</a>
       <a href="/delete_task/{{task.id}}" class="btn btn-primary">Delete Task</a>
     </div>

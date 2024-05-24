@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SelectField
 from wtforms.validators import InputRequired, Email
-from models import TASK_SIZES, COMPLEXITY_CHOICES, TaskType
+from models import TASK_SIZES, COMPLEXITY_CHOICES, TaskType, TaskStatus
 
 
 complexity_select_options = [
@@ -10,7 +10,7 @@ complexity_select_options = [
 task_type_select_options = [
     (t_type.value, t_type.value.capitalize()) for t_type in TaskType
 ]
-
+task_status_select_options = [(status.value, status.name) for status in TaskStatus]
 
 class LoginForm(FlaskForm):
     email = StringField("Email", validators=[InputRequired(), Email()])
@@ -36,6 +36,11 @@ class AddTaskForm(FlaskForm):
         "Task Type",
         choices=task_type_select_options,
         default=TaskType.development.value,
+    )
+    task_status = SelectField(
+        "Task Status",
+        choices=task_status_select_options,
+        default=TaskStatus.Pending.value,
     )
 
 

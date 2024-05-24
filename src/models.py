@@ -1,16 +1,23 @@
 from enum import Enum
+from utils import calculate_task_estimate
 
 TASK_SIZES = {2: 2, 4: 4, 6: 6, 8: 8}
 COMPLEXITY_CHOICES = {"easy": 10, "medium": 20, "hard": 40}
 
 
 class TaskType(Enum):
-    development = "dev"
+    development = "development"
     testing = "testing"
     documentation = "documentation"
     maintenence = "maintenence"
     admin = "admin"
     ops = "ops"
+
+
+class TaskStatus(Enum):
+    Done = "done"
+    Pending = "pending"
+    Blocker = "blocker"
 
 
 class User:
@@ -34,7 +41,15 @@ class User:
 
 class TaskEstimation:
     def __init__(
-        self, name, description, complexity, size, task_type, user_id, _id=None
+        self,
+        name,
+        description,
+        complexity,
+        size,
+        task_type,
+        task_status,
+        user_id,
+        _id=None,
     ) -> None:
         self._id = _id
         self.name = name
@@ -42,16 +57,22 @@ class TaskEstimation:
         self.complexity = complexity
         self.size = size
         self.task_type = task_type
+        self.task_status = task_status
         self.user_id = user_id
 
-    def get_data(self, ignore_fields=["id"]):
+    def get_data(self, ignore_fields=["id"], convert_task_complexity=False):
+        task_complexity = self.complexity
+        if convert_task_complexity:
+            task_complexity = {v:k for k,v in COMPLEXITY_CHOICES.items()}[self.complexity]
         di = {
             "id": str(self._id),
             "name": self.name,
             "description": self.description,
-            "complexity": self.complexity,
+            "complexity": task_complexity,
             "size": self.size,
             "task_type": self.task_type,
+            "task_status": self.task_status,
+            "task_estimate": calculate_task_estimate(self.complexity, self.size),
             "user_id": self.user_id,
         }
         for key in ignore_fields:

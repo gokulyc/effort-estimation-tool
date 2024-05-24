@@ -30,6 +30,10 @@
         {{ form.task_type.label(class_="form-label-sm") }}<br>
         {{ form.task_type(class_="form-control-sm") }}
     </p>
+    <p>
+        {{ form.task_status.label(class_="form-label-sm") }}<br>
+        {{ form.task_status(class_="form-control-sm") }}
+    </p>
     {% if request_type == "add" %}
     <p><input class="btn btn-primary" type="submit" value="Add Task Estimate"></p>
     {% else %}

@@ -10,11 +10,11 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
     get_jwt,
 )
-
+from flask_pymongo import PyMongo, ObjectId
 from models import User, TaskEstimation
 from forms import RegisterForm, LoginForm, AddTaskForm, EditTaskForm, DeleteTaskForm
 from config import create_flask_app
-from flask_pymongo import PyMongo, ObjectId
+
 
 app = create_flask_app()
 
@@ -118,6 +118,7 @@ def add_task():
                     "complexity": int(form_data["complexity"]),
                     "size": int(form_data["size"]),
                     "task_type": form_data["task_type"],
+                    "task_status": form_data["task_status"],
                     "user_id": jwt_payload["id"],
                 }
             )
@@ -149,6 +150,7 @@ def edit_task(task_id):
                     "complexity": int(form_data["complexity"]),
                     "size": int(form_data["size"]),
                     "task_type": form_data["task_type"],
+                    "task_status": form_data["task_status"],
                     # "user_id": jwt_payload["id"],
                 },
             )
@@ -191,7 +193,7 @@ def delete_task(task_id):
 def list_tasks():
     list_tasks_result = mongo.db.task_estimate.find()
     list_tasks = [
-        TaskEstimation(**task).get_data(ignore_fields=[]) for task in list_tasks_result
+        TaskEstimation(**task).get_data(ignore_fields=[], convert_task_complexity=True) for task in list_tasks_result
     ]
     # print(list_tasks)
     return render_template("list_task_estimate.html", tasks=list_tasks)
@@ -205,5 +207,22 @@ def logout_with_cookies():
 
 
 if __name__ == "__main__":
+    from sample_data import AUTH_USERS_DEMO_DATA, TASK_ESTIMATIONS_DEMO_DATA
+
     mongo.init_app(app)
+    # mongo.db.auth_users.drop()
+    # mongo.db.task_estimate.drop()
+    try:
+        ...
+        # mongo.db.auth_users.create_index("email", unique=True)
+        # result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
+        # print(f"{result.inserted_ids}")
+
+        # user = mongo.db.auth_users.find_one({"email": "g@g.com"})
+        # print(user)
+        # TASK_DATA_W_User = map(lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA)
+        # result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
+        # print(f"{result.inserted_ids}")
+    except Exception as e:
+        print(e)
     app.run(debug=True)
