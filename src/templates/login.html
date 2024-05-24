@@ -2,14 +2,14 @@
 {% block content %}
 <h2>Login</h2>
 <form method="POST" action="/login">
+    {{ form.hidden_tag() }}
     <p>
-        <label for="email" class="form-label-sm">Email:</label><br>
-        <input class="form-control-sm" type="text" name="email" size="20" id="email">
+        {{ form.email.label(class_="form-label-sm") }}<br>
+        {{ form.email(class_="form-control-sm",size=20) }}
     </p>
     <p>
-        <label for="password" class="form-label-sm">Password:</label>
-        <br>
-        <input class="form-control-sm" type="password" name="password" size="20">
+        {{ form.password.label(class_="form-label-sm") }}<br>
+        {{ form.password(class_="form-control-sm",size=20) }}
     </p>
     <p><input class="btn btn-primary" type="submit" value="Login"></p>
     {% if message == 'AnonymousUser' %}

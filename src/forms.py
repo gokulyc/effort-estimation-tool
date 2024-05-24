@@ -12,6 +12,11 @@ task_type_select_options = [
 ]
 
 
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators=[InputRequired(), Email()])
+    password = PasswordField("Password", validators=[InputRequired()])
+
+
 class RegisterForm(FlaskForm):
     name = StringField("Name", validators=[InputRequired()])
     email = StringField("Email", validators=[InputRequired(), Email()])
@@ -40,5 +45,7 @@ class EditTaskForm(AddTaskForm):
 
 class DeleteTaskForm(FlaskForm):
     is_delete = SelectField(
-        "Do you want to delete task? ", choices=[("yes", "Yes"), ("no", "No")], default="no"
+        "Do you want to delete task? ",
+        choices=[("yes", "Yes"), ("no", "No")],
+        default="no",
     )

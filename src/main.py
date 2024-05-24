@@ -12,7 +12,7 @@ from flask_jwt_extended import (
 )
 
 from models import User, TaskEstimation
-from forms import RegisterForm, AddTaskForm, EditTaskForm, DeleteTaskForm
+from forms import RegisterForm, LoginForm, AddTaskForm, EditTaskForm, DeleteTaskForm
 from config import create_flask_app
 from flask_pymongo import PyMongo, ObjectId
 
@@ -70,22 +70,26 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     message = request.args.get("message")
+    form = LoginForm()
     if request.method == "POST":
-        user_result = mongo.db.auth_users.find_one({"email": request.form["email"]})
-        if user_result is None:
-            raise HTTPException("User/ Password invalid.")
-        user = User(**user_result)
-        if check_password_hash(user.password, request.form["password"]):
-            additional_claims = {**user.get_data(ignore_fields=["password"])}
-            print(f"{additional_claims=}")
-            access_token = create_access_token(
-                identity={"email": user.email},
-                additional_claims=additional_claims,
-            )
-            response = redirect("/dashboard")
-            set_access_cookies(response, access_token)
-            return response
-    return render_template("login.html", message=message)
+        if form.validate_on_submit():
+            user_result = mongo.db.auth_users.find_one({"email": request.form["email"]})
+            if user_result is None:
+                raise HTTPException("User/ Password invalid.")
+            user = User(**user_result)
+            if check_password_hash(user.password, request.form["password"]):
+                additional_claims = {**user.get_data(ignore_fields=["password"])}
+                # print(f"{additional_claims=}")
+                access_token = create_access_token(
+                    identity={"email": user.email},
+                    additional_claims=additional_claims,
+                )
+                response = redirect("/dashboard")
+                set_access_cookies(response, access_token)
+                return response
+        else:
+            print(form.errors)
+    return render_template("login.html", form=form, message=message)
 
 
 @app.route("/dashboard")
@@ -103,9 +107,6 @@ def dashboard():
 @jwt_required()
 def add_task():
     jwt_payload = get_jwt()
-    # print(f"{current_user=}")
-    # print(f"{jwt_payload=}")
-
     form: AddTaskForm = AddTaskForm()
     if request.method == "POST":
         if form.validate_on_submit():
@@ -132,9 +133,6 @@ def add_task():
 @app.route("/edit_task/<string:task_id>", methods=["GET", "POST"])
 @jwt_required()
 def edit_task(task_id):
-    # jwt_payload = get_jwt()
-    # print(f"{current_user=}")
-    # print(f"{jwt_payload=}")
     task_result = mongo.db.task_estimate.find_one({"_id": ObjectId(task_id)})
     if task_result is None:
         raise NotFound("Task not found.")
@@ -174,7 +172,9 @@ def delete_task(task_id):
         if form.validate_on_submit():
             form_data = form.data
             if form_data["is_delete"] == "yes":
-                result = mongo.db.task_estimate.delete_one(filter={"_id": ObjectId(task_id)})
+                result = mongo.db.task_estimate.delete_one(
+                    filter={"_id": ObjectId(task_id)}
+                )
                 deleted_count = result.deleted_count
                 print(f"Task deleted count : {deleted_count}")
                 flash("Task deleted")
