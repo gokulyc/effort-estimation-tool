@@ -12,7 +12,7 @@ from flask_jwt_extended import (
 )
 
 from models import User, TaskEstimation
-from forms import RegisterForm, AddTaskForm, EditTaskForm
+from forms import RegisterForm, AddTaskForm, EditTaskForm, DeleteTaskForm
 from config import create_flask_app
 from flask_pymongo import PyMongo, ObjectId
 
@@ -91,8 +91,10 @@ def login():
 @app.route("/dashboard")
 @jwt_required()
 def dashboard():
+    jwt_payload = get_jwt()
+    print(f"{jwt_payload=}")
     account: User = mongo.db.auth_users.find_one_or_404(
-        {"_id": ObjectId("664ed9f5df4b803e7381907d")}
+        {"_id": ObjectId(jwt_payload["id"])}
     )
     return render_template("dashboard.html", account=User(**account))
 
@@ -121,7 +123,7 @@ def add_task():
             task_id = result.inserted_id
             print(f"Task added : {str(task_id)}")
             flash("Task Added")
-            return render_template("add_task_estimate.html", form=form, request_type="add")
+            return redirect("/list_tasks")
         else:
             print(form.errors)
     return render_template("add_task_estimate.html", form=form, request_type="add")
@@ -137,7 +139,7 @@ def edit_task(task_id):
     if task_result is None:
         raise NotFound("Task not found.")
     task = TaskEstimation(**task_result).get_data(ignore_fields=["id", "user_id"])
-    form: AddTaskForm = EditTaskForm(**task)
+    form: EditTaskForm = EditTaskForm(**task)
     if request.method == "POST":
         if form.validate_on_submit():
             form_data = form.data
@@ -155,10 +157,34 @@ def edit_task(task_id):
             task_id = result.inserted_id
             print(f"Task updated : {str(task_id)}")
             flash("Task updated")
-            return render_template("add_task_estimate.html", form=form, request_type="edit")
+            return redirect("/list_tasks")
         else:
             print(form.errors)
     return render_template("add_task_estimate.html", form=form, request_type="edit")
+
+
+@app.route("/delete_task/<string:task_id>", methods=["GET", "POST"])
+@jwt_required()
+def delete_task(task_id):
+    task_result = mongo.db.task_estimate.find_one({"_id": ObjectId(task_id)})
+    if task_result is None:
+        raise NotFound("Task not found.")
+    form: DeleteTaskForm = DeleteTaskForm()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            form_data = form.data
+            if form_data["is_delete"] == "yes":
+                result = mongo.db.task_estimate.delete_one(filter={"_id": ObjectId(task_id)})
+                deleted_count = result.deleted_count
+                print(f"Task deleted count : {deleted_count}")
+                flash("Task deleted")
+                return redirect("/list_tasks")
+            else:
+                flash("Task deletion cancelled.")
+                return redirect("/list_tasks")
+        else:
+            print(form.errors)
+    return render_template("delete_task_estimate.html", form=form)
 
 
 @app.route("/list_tasks", methods=["GET"])
@@ -167,7 +193,7 @@ def list_tasks():
     list_tasks = [
         TaskEstimation(**task).get_data(ignore_fields=[]) for task in list_tasks_result
     ]
-    print(list_tasks)
+    # print(list_tasks)
     return render_template("list_task_estimate.html", tasks=list_tasks)
 
 

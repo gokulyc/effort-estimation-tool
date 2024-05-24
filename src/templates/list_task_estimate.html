@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
 <h2>List of Task Estimates </h2>
+{% include "components/flash_messages.html" %}
 {% for task in tasks%}
 <div class="card" style="width: 18rem;">
-    <img src="..." class="card-img-top" alt="...">
+    <!-- <img src="..." class="card-img-top" alt="..."> -->
     <h5 class="card-img-top">{{ task.name}}</h5>
     <div class="card-body">
       <h5 class="card-title"></h5>
@@ -12,6 +13,7 @@
       <p>Size: {{task.size}}</p>
       <p>Task Type: {{task.task_type}}</p>
       <a href="/edit_task/{{task.id}}" class="btn btn-primary">Edit Task</a>
+      <a href="/delete_task/{{task.id}}" class="btn btn-primary">Delete Task</a>
     </div>
   </div>
 {% endfor %}

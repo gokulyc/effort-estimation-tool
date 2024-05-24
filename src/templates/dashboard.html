@@ -6,13 +6,5 @@
 <p style="background-color: rgb(62, 127, 248);color: antiquewhite;">You name is  {{account.name}}</p>
 <p style="background-color: rgb(62, 127, 248);color: antiquewhite;">You email is  {{account.email}}</p>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+{% include "components/flash_messages.html" %}
 {% endblock %}

@@ -25,7 +25,7 @@ class AddTaskForm(FlaskForm):
         "Complexity", choices=complexity_select_options, default="easy"
     )
     size = SelectField(
-        "TaskSize", choices=[(k,v) for k,v in TASK_SIZES.items()], default=2
+        "TaskSize", choices=[(k, v) for k, v in TASK_SIZES.items()], default=2
     )
     task_type = SelectField(
         "Task Type",
@@ -33,5 +33,12 @@ class AddTaskForm(FlaskForm):
         default=TaskType.development.value,
     )
 
+
 class EditTaskForm(AddTaskForm):
     pass
+
+
+class DeleteTaskForm(FlaskForm):
+    is_delete = SelectField(
+        "Do you want to delete task? ", choices=[("yes", "Yes"), ("no", "No")], default="no"
+    )

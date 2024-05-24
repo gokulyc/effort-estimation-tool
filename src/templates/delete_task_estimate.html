@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>Delete Task Estimate </h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.is_delete.label(class_="form-label-sm") }}<br>
+        {{ form.is_delete(class_="form-control-sm") }}
+    </p>
+
+    <p><input class="btn btn-primary" type="submit" value="Submit"></p>
+
+</form>
+{% include "components/flash_messages.html" %}
+{% endblock %}
