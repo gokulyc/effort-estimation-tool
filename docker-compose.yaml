@@ -1,6 +1,16 @@
 version: '3.1'
 
 services:
+  flask_app:
+        build:
+          context: .
+          dockerfile: Dockerfile.flask
+        env_file:
+          - .env.prod
+        ports:
+          - "5000:5000"
+        depends_on:
+          - mongo
   mongo:
     image: mongo:7.0.8
     restart: always
@@ -11,4 +21,4 @@ services:
       - ./data:/data/db
     ports:
       - '27017:27017'
-    network_mode: bridge
+    # network_mode: bridge

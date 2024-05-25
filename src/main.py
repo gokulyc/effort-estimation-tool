@@ -1,3 +1,4 @@
+import os
 from flask import render_template, redirect, url_for, request, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import NotFound, HTTPException, BadRequest
@@ -246,15 +247,15 @@ if __name__ == "__main__":
     # mongo.db.task_estimate.drop()
     try:
         ...
-        # mongo.db.auth_users.create_index("email", unique=True)
-        # result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
-        # print(f"{result.inserted_ids}")
+        mongo.db.auth_users.create_index("email", unique=True)
+        result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
+        print(f"{result.inserted_ids}")
 
-        # user = mongo.db.auth_users.find_one({"email": "g@g.com"})
-        # print(user)
-        # TASK_DATA_W_User = map(lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA)
-        # result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
-        # print(f"{result.inserted_ids}")
+        user = mongo.db.auth_users.find_one({"email": "g@g.com"})
+        print(user)
+        TASK_DATA_W_User = map(lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA)
+        result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
+        print(f"{result.inserted_ids}")
     except Exception as e:
         print(e)
-    app.run(debug=True)
+    app.run(host=os.getenv("BACKEND_FLASK_HOST", "127.0.0.1"), debug=True)
