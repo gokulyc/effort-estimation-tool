@@ -144,18 +144,19 @@ def edit_task(task_id):
         if form.validate_on_submit():
             form_data = form.data
             result = mongo.db.task_estimate.update_one(
-                filter={"_id": task_id},
+                filter={"_id": ObjectId(task_id)},
                 update={
-                    "name": form_data["name"],
-                    "description": form_data["description"],
-                    "complexity": int(form_data["complexity"]),
-                    "size": int(form_data["size"]),
-                    "task_type": form_data["task_type"],
-                    "task_status": form_data["task_status"],
-                    # "user_id": jwt_payload["id"],
+                    "$set": {
+                        "name": form_data["name"],
+                        "description": form_data["description"],
+                        "complexity": int(form_data["complexity"]),
+                        "size": int(form_data["size"]),
+                        "task_type": form_data["task_type"],
+                        "task_status": form_data["task_status"],
+                    }
                 },
             )
-            task_id = result.inserted_id
+            task_id = result.raw_result
             print(f"Task updated : {str(task_id)}")
             flash("Task updated")
             return redirect("/list_tasks")
@@ -246,14 +247,16 @@ if __name__ == "__main__":
     # mongo.db.auth_users.drop()
     # mongo.db.task_estimate.drop()
     try:
-        ...
-        mongo.db.auth_users.create_index("email", unique=True)
-        result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
-        print(f"{result.inserted_ids}")
+        # ...
+        # mongo.db.auth_users.create_index("email", unique=True)
+        # result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
+        # print(f"{result.inserted_ids}")
 
         user = mongo.db.auth_users.find_one({"email": "g@g.com"})
         print(user)
-        TASK_DATA_W_User = map(lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA)
+        TASK_DATA_W_User = map(
+            lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA
+        )
         result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
         print(f"{result.inserted_ids}")
     except Exception as e:
