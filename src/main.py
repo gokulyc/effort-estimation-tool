@@ -1,6 +1,6 @@
-from flask import render_template, redirect, url_for, request, flash
+from flask import render_template, redirect, url_for, request, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.exceptions import NotFound, HTTPException
+from werkzeug.exceptions import NotFound, HTTPException, BadRequest
 from flask_jwt_extended import (
     JWTManager,
     current_user,
@@ -14,7 +14,7 @@ from flask_pymongo import PyMongo, ObjectId
 from models import User, TaskEstimation
 from forms import RegisterForm, LoginForm, AddTaskForm, EditTaskForm, DeleteTaskForm
 from config import create_flask_app
-
+from utils import calculate_estimated_metrics
 
 app = create_flask_app()
 
@@ -193,10 +193,42 @@ def delete_task(task_id):
 def list_tasks():
     list_tasks_result = mongo.db.task_estimate.find()
     list_tasks = [
-        TaskEstimation(**task).get_data(ignore_fields=[], convert_task_complexity=True) for task in list_tasks_result
+        TaskEstimation(**task).get_data(ignore_fields=[], convert_task_complexity=True)
+        for task in list_tasks_result
     ]
     # print(list_tasks)
     return render_template("list_task_estimate.html", tasks=list_tasks)
+
+
+@app.route("/fetch_time_estimate", methods=["POST"])
+def fetch_time_estimate():
+    json_data = request.json
+    task_size = json_data.get("task_size")
+    task_type = json_data.get("task_type")
+
+    if task_size is None or task_type is None:
+        raise BadRequest("task_size/ task_type has invalid value.")
+
+    records = mongo.db.task_estimate.find(
+        {"size": int(task_size), "task_type": task_type}
+    )
+    list_tasks = [
+        TaskEstimation(**rec).get_data(
+            ignore_fields=["id", "name", "description", "complexity", "task_estimate"]
+        )
+        for rec in records
+    ]
+    list_tasks_length = len(list_tasks)
+    if list_tasks_length == 0:
+        return jsonify({"message": "Not enough data"})
+    avg_task_size = round(
+        sum(map(lambda x: x["size"], list_tasks)) / len(list_tasks), 2
+    )
+    print(f"{list_tasks=}")
+    print(f"{avg_task_size=}")
+    result = calculate_estimated_metrics(task_type, int(task_size))
+    # result = {}
+    return jsonify({"message": "ok", "data": result})
 
 
 @app.route("/logout", methods=["GET"])

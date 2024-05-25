@@ -1,4 +1,7 @@
 {% extends "layout.html" %}
+{% block header %}
+<script src="/static/main.js"></script>
+{% endblock %}
 {% block content %}
 
 
@@ -7,7 +10,10 @@
 {% else %}
 <h2>Edit Task Estimate </h2>
 {% endif %}
-
+<div class="alert alert-info alert-dismissible fade show" role="alert" id="task_estimate_alert">
+    <p id="task_message"></p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
 <form method="POST">
     {{ form.hidden_tag() }}
     <p>

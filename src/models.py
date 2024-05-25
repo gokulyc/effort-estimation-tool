@@ -1,5 +1,5 @@
 from enum import Enum
-from utils import calculate_task_estimate
+from utils import calculate_task_time
 
 TASK_SIZES = {2: 2, 4: 4, 6: 6, 8: 8}
 COMPLEXITY_CHOICES = {"easy": 10, "medium": 20, "hard": 40}
@@ -72,7 +72,7 @@ class TaskEstimation:
             "size": self.size,
             "task_type": self.task_type,
             "task_status": self.task_status,
-            "task_estimate": calculate_task_estimate(self.complexity, self.size),
+            "task_estimate": calculate_task_time(self.complexity, self.size),
             "user_id": self.user_id,
         }
         for key in ignore_fields:
