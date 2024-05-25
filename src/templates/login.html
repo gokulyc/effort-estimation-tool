@@ -6,10 +6,24 @@
     <p>
         {{ form.email.label(class_="form-label-sm") }}<br>
         {{ form.email(class_="form-control-sm",size=20) }}
+        {% if form.email.errors %}
+            <ul class="errors">
+                {% for error in form.email.errors %}
+                <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </p>
     <p>
         {{ form.password.label(class_="form-label-sm") }}<br>
         {{ form.password(class_="form-control-sm",size=20) }}
+        {% if form.password.errors %}
+            <ul class="errors">
+                {% for error in form.password.errors %}
+                <li class="text-danger">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </p>
     <p><input class="btn btn-primary" type="submit" value="Login"></p>
     {% if message == 'AnonymousUser' %}

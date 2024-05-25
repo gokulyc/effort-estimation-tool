@@ -50,21 +50,23 @@ def index():
 def register():
     form = RegisterForm()
     # print(form.data)
-    if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method="scrypt")
-        result = mongo.db.auth_users.insert_one(
-            {
-                "name": form.name.data,
-                "email": form.email.data,
-                "password": hashed_password,
-            }
-        )
-        user_id = result.inserted_id
-        print(f"User added : {str(user_id)}")
-        flash("User registered..., Please login.")
-        return redirect(url_for("dashboard"))
-    else:
-        print(form.errors)
+    if request.method == "POST":
+        if form.validate_on_submit():
+            hashed_password = generate_password_hash(form.password.data, method="scrypt")
+            result = mongo.db.auth_users.insert_one(
+                {
+                    "name": form.name.data,
+                    "email": form.email.data,
+                    "password": hashed_password,
+                }
+            )
+            user_id = result.inserted_id
+            print(f"User added : {str(user_id)}")
+            flash("User registered..., Please login.")
+            return redirect(url_for("dashboard"))
+        else:
+            print(form.errors)
+            return render_template("register.html", form=form)
     return render_template("register.html", form=form)
 
 
@@ -90,6 +92,7 @@ def login():
                 return response
         else:
             print(form.errors)
+            return render_template("login.html", form=form, message=message)
     return render_template("login.html", form=form, message=message)
 
 
@@ -129,6 +132,7 @@ def add_task():
             return redirect("/list_tasks")
         else:
             print(form.errors)
+        return render_template("add_task_estimate.html", form=form, request_type="add")
     return render_template("add_task_estimate.html", form=form, request_type="add")
 
 
@@ -162,6 +166,7 @@ def edit_task(task_id):
             return redirect("/list_tasks")
         else:
             print(form.errors)
+            return render_template("add_task_estimate.html", form=form, request_type="edit")
     return render_template("add_task_estimate.html", form=form, request_type="edit")
 
 
@@ -247,18 +252,18 @@ if __name__ == "__main__":
     # mongo.db.auth_users.drop()
     # mongo.db.task_estimate.drop()
     try:
-        # ...
+        ...
         # mongo.db.auth_users.create_index("email", unique=True)
         # result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
         # print(f"{result.inserted_ids}")
 
-        user = mongo.db.auth_users.find_one({"email": "g@g.com"})
-        print(user)
-        TASK_DATA_W_User = map(
-            lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA
-        )
-        result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
-        print(f"{result.inserted_ids}")
+        # user = mongo.db.auth_users.find_one({"email": "g@g.com"})
+        # print(user)
+        # TASK_DATA_W_User = map(
+        #     lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA
+        # )
+        # result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
+        # print(f"{result.inserted_ids}")
     except Exception as e:
         print(e)
     app.run(host=os.getenv("BACKEND_FLASK_HOST", "127.0.0.1"), debug=True)
