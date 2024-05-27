@@ -52,7 +52,9 @@ def register():
     # print(form.data)
     if request.method == "POST":
         if form.validate_on_submit():
-            hashed_password = generate_password_hash(form.password.data, method="scrypt")
+            hashed_password = generate_password_hash(
+                form.password.data, method="scrypt"
+            )
             result = mongo.db.auth_users.insert_one(
                 {
                     "name": form.name.data,
@@ -139,7 +141,10 @@ def add_task():
 @app.route("/edit_task/<string:task_id>", methods=["GET", "POST"])
 @jwt_required()
 def edit_task(task_id):
-    task_result = mongo.db.task_estimate.find_one({"_id": ObjectId(task_id)})
+    jwt_payload = get_jwt()
+    task_result = mongo.db.task_estimate.find_one(
+        {"_id": ObjectId(task_id), "user_id": jwt_payload["id"]}
+    )
     if task_result is None:
         raise NotFound("Task not found.")
     task = TaskEstimation(**task_result).get_data(ignore_fields=["id", "user_id"])
@@ -166,14 +171,19 @@ def edit_task(task_id):
             return redirect("/list_tasks")
         else:
             print(form.errors)
-            return render_template("add_task_estimate.html", form=form, request_type="edit")
+            return render_template(
+                "add_task_estimate.html", form=form, request_type="edit"
+            )
     return render_template("add_task_estimate.html", form=form, request_type="edit")
 
 
 @app.route("/delete_task/<string:task_id>", methods=["GET", "POST"])
 @jwt_required()
 def delete_task(task_id):
-    task_result = mongo.db.task_estimate.find_one({"_id": ObjectId(task_id)})
+    jwt_payload = get_jwt()
+    task_result = mongo.db.task_estimate.find_one(
+        {"_id": ObjectId(task_id), "user_id": jwt_payload["id"]}
+    )
     if task_result is None:
         raise NotFound("Task not found.")
     form: DeleteTaskForm = DeleteTaskForm()
@@ -182,7 +192,7 @@ def delete_task(task_id):
             form_data = form.data
             if form_data["is_delete"] == "yes":
                 result = mongo.db.task_estimate.delete_one(
-                    filter={"_id": ObjectId(task_id)}
+                    filter={"_id": ObjectId(task_id), "user_id": jwt_payload["id"]}
                 )
                 deleted_count = result.deleted_count
                 print(f"Task deleted count : {deleted_count}")
@@ -197,8 +207,10 @@ def delete_task(task_id):
 
 
 @app.route("/list_tasks", methods=["GET"])
+@jwt_required()
 def list_tasks():
-    list_tasks_result = mongo.db.task_estimate.find()
+    jwt_payload = get_jwt()
+    list_tasks_result = mongo.db.task_estimate.find({"user_id": jwt_payload["id"]})
     list_tasks = [
         TaskEstimation(**task).get_data(ignore_fields=[], convert_task_complexity=True)
         for task in list_tasks_result
