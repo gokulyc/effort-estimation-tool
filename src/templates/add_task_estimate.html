@@ -1,6 +1,14 @@
 {% extends "layout.html" %}
 {% block header %}
 <script src="/static/main.js"></script>
+<style>
+    select,
+    textarea,
+    input[type="text"] {
+        width: 30%;
+        box-sizing: border-box;
+    }
+</style>
 {% endblock %}
 {% block content %}
 
@@ -10,49 +18,59 @@
 {% else %}
 <h2>Edit Task Estimate </h2>
 {% endif %}
-<div class="alert alert-info alert-dismissible fade show" role="alert" id="task_estimate_alert">
-    <p id="task_message"></p>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-<form method="POST">
-    {{ form.hidden_tag() }}
-    <p>
-        {{ form.name.label(class_="form-label-sm") }}<br>
-        {{ form.name(class_="form-control-sm",size=20) }}
-        {% if form.name.errors %}
-            <ul class="errors">
-                {% for error in form.name.errors %}
-                <li class="text-danger">{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </p>
-    <p>
-        {{ form.description.label(class_="form-label-sm") }}<br>
-        {{ form.description(class_="form-control-sm") }}
-    </p>
-    <p>
-        {{ form.complexity.label(class_="form-label-sm") }}<br>
-        {{ form.complexity(class_="form-control-sm") }}
-    </p>
-    <p>
-        {{ form.size.label(class_="form-label-sm") }}<br>
-        {{ form.size(class_="form-control-sm") }}
-    </p>
-    <p>
-        {{ form.task_type.label(class_="form-label-sm") }}<br>
-        {{ form.task_type(class_="form-control-sm") }}
-    </p>
-    <p>
-        {{ form.task_status.label(class_="form-label-sm") }}<br>
-        {{ form.task_status(class_="form-control-sm") }}
-    </p>
-    {% if request_type == "add" %}
-    <p><input class="btn btn-primary" type="submit" value="Add Task Estimate"></p>
-    {% else %}
-    <p><input class="btn btn-primary" type="submit" value="Edit Task Estimate"></p>
-    {% endif %}
+<div class="container card m-4 bg-primary-subtle">
+    <div class="row">
+        <div class="alert alert-info alert-dismissible fade show" role="alert" id="task_estimate_alert">
+            <p id="task_message"></p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container py-5">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.name.label(class_="form-label-sm") }}<br>
+                    {{ form.name(class_="form-control-sm",size=20) }}
+                    {% if form.name.errors %}
+                    <ul class="errors">
+                        {% for error in form.name.errors %}
+                        <li class="text-danger">{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    {{ form.description.label(class_="form-label-sm") }} <br>
+                    {{ form.description(class_="form-control-sm") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.complexity.label(class_="form-label-sm") }}<br>
+                    {{ form.complexity(class_="form-control-sm") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.size.label(class_="form-label-sm") }}<br>
+                    {{ form.size(class_="form-control-sm") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.task_type.label(class_="form-label-sm") }}<br>
+                    {{ form.task_type(class_="form-control-sm") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.task_status.label(class_="form-label-sm") }}<br>
+                    {{ form.task_status(class_="form-control-sm") }}
+                </div>
+                {% if request_type == "add" %}
+                <div class="mb-3"><input class="btn btn-secondary" type="submit" value="Add Task Estimate"></div>
+                {% else %}
+                <div class="mb-3"><input class="btn btn-secondary" type="submit" value="Edit Task Estimate"></div>
+                {% endif %}
 
-</form>
+            </form>
+        </div>
+    </div>
+</div>
+
+
 {% include "components/flash_messages.html" %}
 {% endblock %}
