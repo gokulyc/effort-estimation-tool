@@ -2,7 +2,7 @@ from src.models import User, TaskEstimation
 import pytest
 from werkzeug.security import generate_password_hash
 from src.main import app, mongo, ObjectId
-
+import os
 
 def add_accounts_data(mongo):
     try:
@@ -30,7 +30,7 @@ def app_obj():
     app.config.update(
         {
             "TESTING": True,
-            "MONGO_URI": "mongodb://localhost:27017/effort_estimation_proj_testing",
+            "MONGO_URI": os.getenv("MONGO_URI", "mongodb://localhost:27017/effort_estimation_proj_testing"),
             "WTF_CSRF_ENABLED": False,
         }
     )

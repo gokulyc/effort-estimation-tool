@@ -5,7 +5,7 @@ from jwt import decode
 from flask_pymongo import PyMongo
 
 
-class TestSpeedyMartApp:
+class TestEstimateToolApp:
     def test_example(self, app_obj, db_obj: PyMongo):
         app = app_obj
         with app.app_context():
