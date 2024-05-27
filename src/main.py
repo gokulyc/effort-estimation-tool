@@ -4,7 +4,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.exceptions import NotFound, HTTPException, BadRequest
 from flask_jwt_extended import (
     JWTManager,
-    current_user,
     jwt_required,
     create_access_token,
     set_access_cookies,
@@ -257,25 +256,37 @@ def logout_with_cookies():
     return response
 
 
-if __name__ == "__main__":
-    from sample_data import AUTH_USERS_DEMO_DATA, TASK_ESTIMATIONS_DEMO_DATA
+def add_login_accounts():
+    from sample_data import AUTH_USERS_DEMO_DATA
 
+    try:
+        mongo.db.auth_users.create_index("email", unique=True)
+        result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
+        print(f"{result.inserted_ids}")
+    except Exception as e:
+        print(e)
+
+
+def add_demo_tasks():
+    from sample_data import TASK_ESTIMATIONS_DEMO_DATA
+
+    user = mongo.db.auth_users.find_one({"email": "g@g.com"})
+    print(user)
+    TASK_DATA_W_User = map(
+        lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA
+    )
+    result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
+    print(f"{result.inserted_ids}")
+
+
+if __name__ == "__main__":
     mongo.init_app(app)
-    # mongo.db.auth_users.drop()
-    # mongo.db.task_estimate.drop()
+    add_login_accounts()
+    add_demo_tasks()
     try:
         ...
-        # mongo.db.auth_users.create_index("email", unique=True)
-        # result = mongo.db.auth_users.insert_many(AUTH_USERS_DEMO_DATA)
-        # print(f"{result.inserted_ids}")
-
-        # user = mongo.db.auth_users.find_one({"email": "g@g.com"})
-        # print(user)
-        # TASK_DATA_W_User = map(
-        #     lambda x: {**x, **{"user_id": str(user["_id"])}}, TASK_ESTIMATIONS_DEMO_DATA
-        # )
-        # result = mongo.db.task_estimate.insert_many(TASK_DATA_W_User)
-        # print(f"{result.inserted_ids}")
+        # mongo.db.auth_users.drop()
+        # mongo.db.task_estimate.drop()
     except Exception as e:
         print(e)
     app.run(host=os.getenv("BACKEND_FLASK_HOST", "127.0.0.1"), debug=True)
